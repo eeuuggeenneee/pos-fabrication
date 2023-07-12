@@ -94,8 +94,19 @@ class Cart extends Component {
             .post("/admin/cart/change-qty", { product_id, quantity: qty })
             .then((res) => {})
             .catch((err) => {
-                Swal.fire("Error!", err.response.data.message, "error");
+                if (err.response.status === 400) {
+                    const maxQty = parseInt(err.response.data.message.split(": ")[1]);
+                    const cart = this.state.cart.map((c) => {
+                        if (c.id === product_id) {
+                            c.pivot.quantity = maxQty;  // set the quantity to the maximum quantity
+                        }
+                        return c;
+                    });
+                    this.setState({ cart });
+                    Swal.fire("Error!", err.response.data.message, "error");
+                }
             });
+            
     }
 
     getTotal(cart) {
@@ -207,9 +218,11 @@ class Cart extends Component {
             allowOutsideClick: () => !Swal.isLoading(),
         }).then((result) => {
             if (result.value) {
-                Swal.fire(`Change: ${result.value.change.toFixed(2)}`,
-                ' ',
-                'success');
+                Swal.fire(
+                    `Change: ${result.value.change.toFixed(2)}`,
+                    " ",
+                    "success"
+                );
             }
         });
     }
@@ -218,7 +231,38 @@ class Cart extends Component {
         const { cart, products, customers, barcode } = this.state;
         return (
             <div className="row">
-                <div className="col-md-6 col-lg-4">
+                <div className="col-md-6 col-lg-7">
+                    <div className="mb-2">
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search Product..."
+                            onChange={this.handleChangeSearch}
+                            onKeyDown={this.handleSeach}
+                        />
+                    </div>
+                    <div className="order-product">
+                        {products.map((p) => (
+                            <div
+                                onClick={() => this.addProductToCart(p.barcode)}
+                                key={p.id}
+                                className="item"
+                            >
+                                <img src={p.image_url} alt="" />
+                                <h5
+                                    style={
+                                        window.APP.warning_quantity > p.quantity
+                                            ? { color: "red" }
+                                            : {}
+                                    }
+                                >
+                                    {p.name}({p.quantity})
+                                </h5>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="col-md-6 col-lg-5">
                     <div className="row mb-2">
                         <div className="col">
                             <form onSubmit={this.handleScanBarcode}>
@@ -236,7 +280,7 @@ class Cart extends Component {
                                 className="form-control"
                                 onChange={this.setCustomerId}
                             >
-                                <option value="">Walking Customer</option>
+                                <option value="Walk-In Customer">Walk-In Customer</option>
                                 {customers.map((cus) => (
                                     <option
                                         key={cus.id}
@@ -353,37 +397,6 @@ class Cart extends Component {
                                 Submit
                             </button>
                         </div>
-                    </div>
-                </div>
-                <div className="col-md-6 col-lg-8">
-                    <div className="mb-2">
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search Product..."
-                            onChange={this.handleChangeSearch}
-                            onKeyDown={this.handleSeach}
-                        />
-                    </div>
-                    <div className="order-product">
-                        {products.map((p) => (
-                            <div
-                                onClick={() => this.addProductToCart(p.barcode)}
-                                key={p.id}
-                                className="item"
-                            >
-                                <img src={p.image_url} alt="" />
-                                <h5
-                                    style={
-                                        window.APP.warning_quantity > p.quantity
-                                            ? { color: "red" }
-                                            : {}
-                                    }
-                                >
-                                    {p.name}({p.quantity})
-                                </h5>
-                            </div>
-                        ))}
                     </div>
                 </div>
             </div>

@@ -43,7 +43,13 @@
                 @foreach ($orders as $order)
                 <tr>
                     <td>{{$order->id}}</td>
-                    <td>{{$order->getCustomerName()}}</td>
+                    <td>
+                        @if(($order->customer_id)==null)
+                        Walk-in Customer
+                        @else
+                        {{$order->getCustomerName()}}
+                        @endif
+                    </td>
                     <td>{{ config('settings.currency_symbol') }} {{$order->formattedTotal()}}</td>
                     <td>{{ config('settings.currency_symbol') }} {{$order->formattedReceivedAmount()}}</td>
                     <td>
