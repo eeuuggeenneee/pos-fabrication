@@ -182,14 +182,23 @@ class Cart extends Component {
             confirmButtonText: "Send",
             showLoaderOnConfirm: true,
             preConfirm: (amount) => {
+                const numericAmount = Number(amount);
+                if (isNaN(numericAmount)) {
+                    Swal.showValidationMessage("The amount must be a number");
+                    return;
+                }
+
+                const totalCartValue = Number(this.getTotal(this.state.cart));
+
                 return axios
                     .post("/admin/orders", {
                         customer_id: this.state.customer_id,
-                        amount,
+                        amount: numericAmount,
                     })
                     .then((res) => {
                         this.loadCart();
-                        return res.data;
+                        const change = numericAmount - totalCartValue;
+                        return { ...res.data, change };
                     })
                     .catch((err) => {
                         Swal.showValidationMessage(err.response.data.message);
@@ -198,10 +207,13 @@ class Cart extends Component {
             allowOutsideClick: () => !Swal.isLoading(),
         }).then((result) => {
             if (result.value) {
-                //
+                Swal.fire(`Change: ${result.value.change.toFixed(2)}`,
+                ' ',
+                'success');
             }
         });
     }
+
     render() {
         const { cart, products, customers, barcode } = this.state;
         return (
@@ -249,6 +261,33 @@ class Cart extends Component {
                                         <tr key={c.id}>
                                             <td>{c.name}</td>
                                             <td>
+                                                {c.pivot.quantity > 1 ? (
+                                                    <button
+                                                        className="btn btn-danger btn-sm"
+                                                        onClick={() =>
+                                                            this.handleChangeQty(
+                                                                c.id,
+                                                                c.pivot
+                                                                    .quantity -
+                                                                    1
+                                                            )
+                                                        }
+                                                    >
+                                                        <i className="fas fa-minus"></i>
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="btn btn-danger btn-sm"
+                                                        onClick={() =>
+                                                            this.handleClickDelete(
+                                                                c.id
+                                                            )
+                                                        }
+                                                    >
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                )}
+
                                                 <input
                                                     type="text"
                                                     className="form-control form-control-sm qty"
@@ -260,17 +299,20 @@ class Cart extends Component {
                                                         )
                                                     }
                                                 />
+
                                                 <button
-                                                    className="btn btn-danger btn-sm"
+                                                    className="btn btn-primary btn-sm"
                                                     onClick={() =>
-                                                        this.handleClickDelete(
-                                                            c.id
+                                                        this.handleChangeQty(
+                                                            c.id,
+                                                            c.pivot.quantity + 1
                                                         )
                                                     }
                                                 >
-                                                    <i className="fas fa-trash"></i>
+                                                    <i className="fas fa-plus"></i>
                                                 </button>
                                             </td>
+
                                             <td className="text-right">
                                                 {window.APP.currency_symbol}{" "}
                                                 {(
