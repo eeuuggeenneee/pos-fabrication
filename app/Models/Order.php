@@ -10,6 +10,8 @@ class Order extends Model
         'customer_id',
         'user_id'
     ];
+  
+    protected $appends = ['total'];
 
     public function items()
     {
@@ -31,7 +33,7 @@ class Order extends Model
         if($this->customer) {
             return $this->customer->first_name . ' ' . $this->customer->last_name;
         }
-        return 'Working Customer';
+        return 'Walk-in Customer';
     }
 
     public function total()
@@ -44,6 +46,13 @@ class Order extends Model
     public function formattedTotal()
     {
         return number_format($this->total(), 2);
+    }
+    
+    public function getTotalAttribute()
+    {
+        return $this->items->map(function ($i){
+            return $i->price;
+        })->sum();
     }
 
     public function receivedAmount()
