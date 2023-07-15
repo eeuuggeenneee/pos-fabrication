@@ -4,6 +4,9 @@
 @section('content-header', 'Update Settings')
 
 @section('content')
+
+
+
 <div class="card">
     <div class="card-body">
         <form action="{{ route('settings.store') }}" method="post">
