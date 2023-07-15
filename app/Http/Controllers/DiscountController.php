@@ -17,14 +17,12 @@ class DiscountController extends Controller
     }
     public function show($code)
     {
-        $discount = Discount::where('code', $code)
-            ->where('available_from', '<=', now())
-            ->where('expires_at', '>=', now())
-            ->first();
+        $discount = Discount::where('code', $code)->first();
     
-        if ($discount) {
+        if ($discount && $discount->expires_at >= now()) {
             return response()->json([
                 'isValid' => true,
+                'code' => $discount->code,
                 'discountAmount' => $discount->amount,
             ]);
         } else {
@@ -34,6 +32,7 @@ class DiscountController extends Controller
             ], 404);
         }
     }
+    
     
     
     public function index()

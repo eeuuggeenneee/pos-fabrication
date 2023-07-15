@@ -14,6 +14,11 @@ class Cart extends Component {
             barcode: "",
             search: "",
             customer_id: "",
+            promoCode: "",
+            discountAmount: 0,
+            grossTotal: 0,
+            netTotal: 0,
+            promoCodes: [],
         };
 
         this.loadCart = this.loadCart.bind(this);
@@ -21,25 +26,32 @@ class Cart extends Component {
         this.handleScanBarcode = this.handleScanBarcode.bind(this);
         this.handleChangeQty = this.handleChangeQty.bind(this);
         this.handleEmptyCart = this.handleEmptyCart.bind(this);
-
         this.loadProducts = this.loadProducts.bind(this);
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleSeach = this.handleSeach.bind(this);
         this.setCustomerId = this.setCustomerId.bind(this);
         this.handleClickSubmit = this.handleClickSubmit.bind(this);
+        this.handlePromoCodeChange = this.handlePromoCodeChange.bind(this);
     }
 
     componentDidMount() {
-        // load user cart
         this.loadCart();
         this.loadProducts();
         this.loadCustomers();
+        this.loadPromoCodes();
     }
 
     loadCustomers() {
         axios.get(`/admin/customers`).then((res) => {
             const customers = res.data;
             this.setState({ customers });
+        });
+    }
+
+    loadPromoCodes() {
+        axios.get("/admin/discounts/promocode").then((res) => {
+            const promoCodes = res.data;
+            this.setState({ promoCodes });
         });
     }
 
@@ -53,7 +65,6 @@ class Cart extends Component {
 
     handleOnChangeBarcode(event) {
         const barcode = event.target.value;
-        console.log(barcode);
         this.setState({ barcode });
     }
 
@@ -79,6 +90,7 @@ class Cart extends Component {
                 });
         }
     }
+
     handleChangeQty(product_id, qty) {
         const cart = this.state.cart.map((c) => {
             if (c.id === product_id) {
@@ -87,7 +99,13 @@ class Cart extends Component {
             return c;
         });
 
-        this.setState({ cart });
+        this.setState({ cart }, () => {
+            const grossTotal = this.getTotal(this.state.cart);
+            const netTotal =
+                parseFloat(grossTotal) - parseFloat(this.state.discountAmount);
+            this.setState({ grossTotal, netTotal });
+        });
+
         if (!qty) return;
 
         axios
@@ -95,10 +113,12 @@ class Cart extends Component {
             .then((res) => {})
             .catch((err) => {
                 if (err.response.status === 400) {
-                    const maxQty = parseInt(err.response.data.message.split(": ")[1]);
+                    const maxQty = parseInt(
+                        err.response.data.message.split(": ")[1]
+                    );
                     const cart = this.state.cart.map((c) => {
                         if (c.id === product_id) {
-                            c.pivot.quantity = maxQty;  // set the quantity to the maximum quantity
+                            c.pivot.quantity = maxQty;
                         }
                         return c;
                     });
@@ -106,13 +126,13 @@ class Cart extends Component {
                     Swal.fire("Error!", err.response.data.message, "error");
                 }
             });
-            
     }
 
     getTotal(cart) {
         const total = cart.map((c) => c.pivot.quantity * c.price);
         return sum(total).toFixed(2);
     }
+
     handleClickDelete(product_id) {
         axios
             .post("/admin/cart/delete", { product_id, _method: "DELETE" })
@@ -121,15 +141,18 @@ class Cart extends Component {
                 this.setState({ cart });
             });
     }
+
     handleEmptyCart() {
         axios.post("/admin/cart/empty", { _method: "DELETE" }).then((res) => {
             this.setState({ cart: [] });
         });
     }
+
     handleChangeSearch(event) {
         const search = event.target.value;
         this.setState({ search });
     }
+
     handleSeach(event) {
         if (event.keyCode === 13) {
             this.loadProducts(event.target.value);
@@ -139,10 +162,8 @@ class Cart extends Component {
     addProductToCart(barcode) {
         let product = this.state.products.find((p) => p.barcode === barcode);
         if (!!product) {
-            // if product is already in cart
             let cart = this.state.cart.find((c) => c.id === product.id);
             if (!!cart) {
-                // update quantity
                 this.setState({
                     cart: this.state.cart.map((c) => {
                         if (
@@ -172,7 +193,6 @@ class Cart extends Component {
             axios
                 .post("/admin/cart", { barcode })
                 .then((res) => {
-                    // this.loadCart();
                     console.log(res);
                 })
                 .catch((err) => {
@@ -184,6 +204,7 @@ class Cart extends Component {
     setCustomerId(event) {
         this.setState({ customer_id: event.target.value });
     }
+
     handleClickSubmit() {
         Swal.fire({
             title: "Received Amount",
@@ -226,9 +247,52 @@ class Cart extends Component {
             }
         });
     }
+    handlePromoCodeChange(event) {
+        const promoCode = event.target.value;
+        this.setState({ promoCode });
+      
+        // Call the API to fetch the discount details
+        axios
+          .get(`/admin/discounts/promocode/${promoCode}`)
+          .then((res) => {
+            const { isValid, discountAmount } = res.data;
+            console.log("Discount Amount:", discountAmount); // Log the discount amount
+            const grossTotal = this.getTotal(this.state.cart);
+            const discount = parseFloat(discountAmount);
+            const netTotal = parseFloat(grossTotal) - discount;
+            console.log(netTotal);
+      
+            if (isValid) {
+              this.setState({
+                discountAmount,
+                grossTotal,
+                netTotal,
+              });
+            } else {
+              Swal.fire("Error!", "Invalid discount code.", "error");
+              this.setState({
+                discountAmount: 0,
+                grossTotal: this.getTotal(this.state.cart),
+                netTotal: this.getTotal(this.state.cart),
+              });
+            }
+          });
+      }
+      
 
     render() {
-        const { cart, products, customers, barcode } = this.state;
+        const {
+            cart,
+            products,
+            customers,
+            barcode,
+            promoCode,
+            discountAmount,
+            grossTotal,
+            netTotal,
+            promoCodes,
+        } = this.state;
+
         return (
             <div className="row">
                 <div className="col-md-6 col-lg-7">
@@ -280,7 +344,9 @@ class Cart extends Component {
                                 className="form-control"
                                 onChange={this.setCustomerId}
                             >
-                                <option value="Walk-In Customer">Walk-In Customer</option>
+                                <option value="Walk-In Customer">
+                                    Walk-In Customer
+                                </option>
                                 {customers.map((cus) => (
                                     <option
                                         key={cus.id}
@@ -331,7 +397,6 @@ class Cart extends Component {
                                                         <i className="fas fa-trash"></i>
                                                     </button>
                                                 )}
-
                                                 <input
                                                     type="text"
                                                     className="form-control form-control-sm qty"
@@ -343,7 +408,6 @@ class Cart extends Component {
                                                         )
                                                     }
                                                 />
-
                                                 <button
                                                     className="btn btn-primary btn-sm"
                                                     onClick={() =>
@@ -356,7 +420,6 @@ class Cart extends Component {
                                                     <i className="fas fa-plus"></i>
                                                 </button>
                                             </td>
-
                                             <td className="text-right">
                                                 {window.APP.currency_symbol}{" "}
                                                 {(
@@ -371,11 +434,43 @@ class Cart extends Component {
                     </div>
 
                     <div className="row">
-                        <div className="col">Total:</div>
+                        <div className="col">Promo Code:</div>
+                        <div className="col">
+                            <select
+                                className="form-control"
+                                value={promoCode}
+                                onChange={this.handlePromoCodeChange}
+                            >
+                                <option value="">Select Promo Code</option>
+                                {promoCodes.map((code) => (
+                                    <option key={code.id} value={code.code}>
+                                        {code.code}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col">Gross Total:</div>
                         <div className="col text-right">
                             {window.APP.currency_symbol} {this.getTotal(cart)}
                         </div>
                     </div>
+                    <div className="row">
+                        <div className="col">Discount:</div>
+                        <div className="col text-right">
+                            {window.APP.currency_symbol}{" "}
+                            -{discountAmount}
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col">Net Total:</div>
+                        <div className="col text-right">
+                            {window.APP.currency_symbol} {this.getTotal(cart)}
+                        </div>
+                    </div>
+                  
+
                     <div className="row">
                         <div className="col">
                             <button

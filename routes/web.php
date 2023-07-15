@@ -36,11 +36,13 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::put('/discounts/{discount}', [DiscountController::class, 'update'])->name('discounts.update');
     Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
     Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
-    Route::get('/discounts/promocode', [DiscountController::class, 'promocode'])->name('discounts.promocode');
+    Route::get('/discounts/promocode/{promocode}', [DiscountController::class, 'show'])->name('discounts.promocode');
+    Route::get('/discounts/promocode', [DiscountController::class, 'promocode'])->name('discounts.promocode2');
 
     Route::get('/reportForm', function () {
         return view('report.report');
     })->name('reportForm');
+    
     Route::post('/generateReport', [ReportController::class, 'generateReport'])->name('generateReport');
 
 });

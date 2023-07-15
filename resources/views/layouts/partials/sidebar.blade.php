@@ -59,7 +59,7 @@
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
-                    <a href="{{ route('discounts.index') }}" class="nav-link {{ activeSegment('discounts.index') }}">
+                    <a href="{{ route('discounts.index') }}" class="nav-link {{ activeSegment('discounts') }}">
                         <i class="nav-icon fas fa-percent"></i>
                         <p>Discounts</p>
                     </a>
