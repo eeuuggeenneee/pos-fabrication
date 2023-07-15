@@ -47,6 +47,15 @@
                 </span>
                 @enderror
             </div>
+                <div class="form-group">
+                <label for="tax">Tax</label>
+                <input type="number" name="tax" class="form-control @error('tax') is-invalid @enderror" id="tax" placeholder="%" value="{{ old('tax', config('settings.tax')) }}" >
+                @error('tax')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
             <button type="submit" class="btn btn-primary">Change Setting</button>
         </form>
     </div>
