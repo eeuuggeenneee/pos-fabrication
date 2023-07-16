@@ -6,13 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
+     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
+       
+
             $table->string('code')->unique();
             $table->decimal('amount', 8, 2);
             $table->date('available_from');
@@ -20,9 +24,10 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
     public function down(): void
     {

@@ -38,9 +38,10 @@ class OrderController extends Controller
         $cart = $request->user()->cart()->get();
         foreach ($cart as $item) {
             $order->items()->create([
-                'price' => $item->price * $item->pivot->quantity,
+                'price' => $request->netTotal,
                 'quantity' => $item->pivot->quantity,
                 'product_id' => $item->id,
+                'discount_id' => $request->discount_id,
             ]);
             $item->quantity = $item->quantity - $item->pivot->quantity;
             $item->save();

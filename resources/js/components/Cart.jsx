@@ -14,6 +14,7 @@ class Cart extends Component {
             barcode: "",
             search: "",
             customer_id: "",
+            discount_id: "",
             promoCode: "",
             discountAmount: 0,
             grossTotal: 0,
@@ -204,28 +205,66 @@ class Cart extends Component {
     setCustomerId(event) {
         this.setState({ customer_id: event.target.value });
     }
+    handlePromoCodeChange(event) {
+        const promoCode = event.target.value;
+        this.setState({ promoCode });
 
+        // Call the API to fetch the discount details
+        axios.get(`/admin/discounts/promocode/${promoCode}`).then((res) => {
+            const { isValid, discountAmount, discount_id } = res.data; 
+            console.log("Discount Amount:", discountAmount);
+            console.log("Discount Amount:", discount_id);
+            const grossTotal = this.getTotal(this.state.cart);
+            const discount = parseFloat(discountAmount);
+            const netTotal = parseFloat(grossTotal) - discount;
+
+            console.log(netTotal);
+
+            if (isValid) {
+                this.setState({
+                    discountAmount,
+                    grossTotal,
+                    netTotal,
+                    discount_id,
+                });
+            } else {
+                Swal.fire("Error!", "Invalid discount code.", "error");
+                this.setState({
+                    discountAmount: 0,
+                    grossTotal: this.getTotal(this.state.cart),
+                    netTotal: this.getTotal(this.state.cart),
+                    discountId: null, // Reset the discountId if the code is invalid
+                });
+            }
+        });
+    }
     handleClickSubmit() {
         Swal.fire({
             title: "Received Amount",
             input: "text",
-            inputValue: this.getTotal(this.state.cart),
+            inputValue: this.state.netTotal.toFixed(2),
             showCancelButton: true,
-            confirmButtonText: "Send",
+            confirmButtonText: "Confirm",
             showLoaderOnConfirm: true,
             preConfirm: (amount) => {
                 const numericAmount = Number(amount);
                 if (isNaN(numericAmount)) {
                     Swal.showValidationMessage("The amount must be a number");
+                
                     return;
                 }
-
-                const totalCartValue = Number(this.getTotal(this.state.cart));
-
+    
+                const totalCartValue =
+                    this.state.discountAmount > 0
+                        ? this.state.netTotal
+                        : this.getTotal(this.state.cart);
+    
                 return axios
                     .post("/admin/orders", {
                         customer_id: this.state.customer_id,
                         amount: numericAmount,
+                        discount_id: this.state.discount_id, 
+                        netTotal: this.state.netTotal,
                     })
                     .then((res) => {
                         this.loadCart();
@@ -247,38 +286,7 @@ class Cart extends Component {
             }
         });
     }
-    handlePromoCodeChange(event) {
-        const promoCode = event.target.value;
-        this.setState({ promoCode });
-      
-        // Call the API to fetch the discount details
-        axios
-          .get(`/admin/discounts/promocode/${promoCode}`)
-          .then((res) => {
-            const { isValid, discountAmount } = res.data;
-            console.log("Discount Amount:", discountAmount); // Log the discount amount
-            const grossTotal = this.getTotal(this.state.cart);
-            const discount = parseFloat(discountAmount);
-            const netTotal = parseFloat(grossTotal) - discount;
-            console.log(netTotal);
-      
-            if (isValid) {
-              this.setState({
-                discountAmount,
-                grossTotal,
-                netTotal,
-              });
-            } else {
-              Swal.fire("Error!", "Invalid discount code.", "error");
-              this.setState({
-                discountAmount: 0,
-                grossTotal: this.getTotal(this.state.cart),
-                netTotal: this.getTotal(this.state.cart),
-              });
-            }
-          });
-      }
-      
+    
 
     render() {
         const {
@@ -459,17 +467,18 @@ class Cart extends Component {
                     <div className="row">
                         <div className="col">Discount:</div>
                         <div className="col text-right">
-                            {window.APP.currency_symbol}{" "}
-                            -{discountAmount}
+                            {window.APP.currency_symbol} -{discountAmount}
                         </div>
                     </div>
                     <div className="row">
                         <div className="col">Net Total:</div>
                         <div className="col text-right">
-                            {window.APP.currency_symbol} {this.getTotal(cart)}
+                            <strong>
+                                {" "}
+                                {window.APP.currency_symbol} {netTotal}{" "}
+                            </strong>
                         </div>
                     </div>
-                  
 
                     <div className="row">
                         <div className="col">

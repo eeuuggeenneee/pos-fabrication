@@ -19,10 +19,12 @@ return new class extends Migration
             $table->integer('quantity')->default(1);
             $table->foreignId('order_id');
             $table->foreignId('product_id');
+            $table->bigInteger('discount_id')->unsigned()->nullable();
             $table->timestamps();
 
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->foreign('discount_id')->references('id')->on('discounts')->onDelete('set null');
         });
     }
 

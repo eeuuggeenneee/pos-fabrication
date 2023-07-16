@@ -22,6 +22,7 @@ class DiscountController extends Controller
         if ($discount && $discount->expires_at >= now()) {
             return response()->json([
                 'isValid' => true,
+                'discount_id' => $discount->id,
                 'code' => $discount->code,
                 'discountAmount' => $discount->amount,
             ]);
