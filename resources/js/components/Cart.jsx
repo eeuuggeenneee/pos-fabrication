@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-import ReactToPrint from "react-to-print";
 import { sum } from "lodash";
 
 class Cart extends Component {
@@ -123,7 +122,7 @@ class Cart extends Component {
         if (!qty) return;
 
         axios
-            .post("/admin/cart/change-qty", { product_id, quantity: qty })
+            .post("/admin/cart/change-qty", { product_id, quantity: qty, dis_id: this.state.discount_id })
             .then((res) => {})
             .catch((err) => {
                 if (err.response.status === 400) {

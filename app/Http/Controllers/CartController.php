@@ -66,6 +66,7 @@ class CartController extends Controller
                 ], 400);
             }
             $cart->pivot->quantity = $request->quantity;
+            $cart->pivot->discount_id = $request->dis_id;
             $cart->pivot->save();
         }
 
