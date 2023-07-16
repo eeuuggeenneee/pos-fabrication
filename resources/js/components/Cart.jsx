@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
+import ReactToPrint from "react-to-print";
 import { sum } from "lodash";
 
 class Cart extends Component {
@@ -20,6 +21,7 @@ class Cart extends Component {
             grossTotal: 0,
             netTotal: 0,
             promoCodes: [],
+            receiptData: null
         };
 
         this.loadCart = this.loadCart.bind(this);
@@ -102,9 +104,20 @@ class Cart extends Component {
 
         this.setState({ cart }, () => {
             const grossTotal = this.getTotal(this.state.cart);
-            const netTotal =
-                parseFloat(grossTotal) - parseFloat(this.state.discountAmount);
-            this.setState({ grossTotal, netTotal });
+
+            if (this.state.discountAmount == 0) {
+                const equal = grossTotal * (window.APP.tax / 100);
+                const netTotal = parseFloat(equal) + parseFloat(grossTotal);
+                console.log(equal);
+                this.setState({ grossTotal, netTotal });
+            } else {
+                const discount = parseFloat(this.state.discountAmount);
+                const equal = parseFloat(grossTotal) - parseFloat(discount);
+                const tax1 = equal * (window.APP.tax / 100);
+                const netTotal = parseFloat(tax1) + parseFloat(equal);
+                console.log(equal);
+                this.setState({ grossTotal, netTotal });
+            }
         });
 
         if (!qty) return;
@@ -209,16 +222,18 @@ class Cart extends Component {
         const promoCode = event.target.value;
         this.setState({ promoCode });
 
-        // Call the API to fetch the discount details
         axios.get(`/admin/discounts/promocode/${promoCode}`).then((res) => {
-            const { isValid, discountAmount, discount_id } = res.data; 
+            const { isValid, discountAmount, discount_id } = res.data;
             console.log("Discount Amount:", discountAmount);
             console.log("Discount Amount:", discount_id);
+
             const grossTotal = this.getTotal(this.state.cart);
             const discount = parseFloat(discountAmount);
-            const netTotal = parseFloat(grossTotal) - discount;
-
-            console.log(netTotal);
+            const equal = grossTotal - discount;
+            const tax =
+                (parseFloat(grossTotal) - discount) * (window.APP.tax / 100);
+            const netTotal = tax + equal;
+            console.log(tax);
 
             if (isValid) {
                 this.setState({
@@ -233,11 +248,12 @@ class Cart extends Component {
                     discountAmount: 0,
                     grossTotal: this.getTotal(this.state.cart),
                     netTotal: this.getTotal(this.state.cart),
-                    discountId: null, // Reset the discountId if the code is invalid
+                    discountId: null,
                 });
             }
         });
     }
+      
     handleClickSubmit() {
         Swal.fire({
             title: "Received Amount",
@@ -286,7 +302,6 @@ class Cart extends Component {
             }
         });
     }
-    
 
     render() {
         const {
@@ -467,15 +482,30 @@ class Cart extends Component {
                     <div className="row">
                         <div className="col">Discount:</div>
                         <div className="col text-right">
-                            {window.APP.currency_symbol} -{discountAmount}
+                            {window.APP.currency_symbol} - {discountAmount}
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col">Tax:</div>
+                        <div className="col text-right">
+                            {window.APP.currency_symbol}{" "}
+                            {(window.APP.tax / 100) *
+                                (this.getTotal(cart) - discountAmount)}
                         </div>
                     </div>
                     <div className="row">
                         <div className="col">Net Total:</div>
                         <div className="col text-right">
                             <strong>
-                                {" "}
-                                {window.APP.currency_symbol} {netTotal}{" "}
+                                {netTotal === 0
+                                    ? `${window.APP.currency_symbol} ${(
+                                          parseFloat(this.getTotal(cart)) +
+                                          parseFloat(this.getTotal(cart)) *
+                                              (window.APP.tax / 100)
+                                      ).toFixed(2)}`
+                                    : `${
+                                          window.APP.currency_symbol
+                                      } ${parseFloat(netTotal).toFixed(2)}`}
                             </strong>
                         </div>
                     </div>
@@ -502,9 +532,11 @@ class Cart extends Component {
                             </button>
                         </div>
                     </div>
+                    {this.state.receiptData && <Receipt order={this.state.receiptData} />}
                 </div>
             </div>
         );
+        
     }
 }
 
