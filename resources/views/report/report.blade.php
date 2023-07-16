@@ -10,17 +10,17 @@
                     <div class="card-header">Sale Report Generator</div>
 
                     <div class="card-body">
-                        <form method="POST" action="{{ route('generateReport') }}">
+                        <form method="POST" action="{{ route('generateReport') }}" target="_blank">
                             @csrf
 
                             <div class="form-group">
                                 <label for="fromDate">From:</label>
-                                <input type="date" class="form-control" id="fromDate" name="fromDate">
+                                <input type="date" class="form-control" id="fromDate" name="fromDate" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="toDate">To:</label>
-                                <input type="date" class="form-control" id="toDate" name="toDate">
+                                <input type="date" class="form-control" id="toDate" name="toDate" required>
                             </div>
 
                             <button type="submit" class="btn btn-primary">Generate Report</button>
