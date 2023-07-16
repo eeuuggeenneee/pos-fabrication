@@ -40,7 +40,7 @@ class ReportController extends Controller
         $pdf->AddPage();
         $pdf->SetFont('Arial', 'B', 30);
     
-        $pdf->Cell(190, 10, 'Order Report', 0, 1, 'C');
+        $pdf->Cell(190, 10, 'Sales Report', 0, 1, 'C');
         $pdf->SetFont('Arial', 'B', 15);
         $pdf->Cell(190, 10, 'Date Range: ' . $fromDate . ' to ' . $toDate, 0, 1, 'C');
         $pdf->Ln();
