@@ -125,22 +125,63 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
+
+    public function printInventoryHistory(Request $request)
+    {
+        $fromDate = $request->fromDate;
+        $toDate = $request->toDate;
+
+        $history = History::whereBetween('updated_at', [$fromDate, $toDate])->get();
+
+        $pdf = new \FPDF();
+        $pdf->AddPage(); // Set landscape orientation
+        $pdf->SetFont('Arial', 'B', 30);
+
+        $pdf->Cell(0, 10, 'Inventory History Report', 0, 1, 'C');
+        $pdf->Ln();
+        $pdf->SetFont('Arial', 'B', 15);
+        $pdf->Cell(190, 5, 'Date Range: ' . $fromDate . ' to ' . $toDate, 0, 1, 'C');
+        $pdf->Ln();
+        // Add table headers
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(35, 10, 'Action', 1, 0, 'C');
+        $pdf->Cell(35, 10, 'Product', 1, 0, 'C');
+        $pdf->Cell(120, 10, 'Description', 1, 1, 'C'); // Adjust width for landscape orientation
+
+
+        // Add table rows
+        $pdf->SetFont('Arial', '', 12);
+        foreach ($history as $record) {
+            $pdf->Cell(35, 10, $record->action, 1, 0, 'C');
+            $pdf->Cell(35, 10, $record->product, 1, 0, 'C');
+            $pdf->Cell(120, 10, $record->description, 1, 1, 'C');
+        }
+
+        // Output the PDF
+        $content = $pdf->Output('inventory_history.pdf', 'I');
+
+        return response($content)->header('Content-Type', 'application/pdf');
+    }
+
+
+
+
     public function update(ProductUpdateRequest $request, Product $product)
     {
+        $oldName = $product->name; // Store the old name for comparison
+        $oldPrice = $product->price; // Store the old price for comparison
+        $oldQuantity = $product->quantity; // Store the old quantity for comparison
+        $oldStatus = $product->status; // Store the old status for comparison
+        $oldDesc = $product->description;
+        $oldImage = $product->image; // Store the old image for comparison
+    
         $product->name = $request->name;
         $product->description = $request->description;
         $product->barcode = $request->barcode;
-
-        $oldPrice = $product->price; // Store the old price for comparison
         $product->price = $request->price;
 
-        $oldQuantity = $product->quantity; // Store the old quantity for comparison
         $product->quantity = $request->quantity;
-
-        $oldStatus = $product->status; // Store the old status for comparison
         $product->status = $request->status;
-
-        $oldImage = $product->image; // Store the old image for comparison
 
         if ($request->hasFile('image')) {
             // Delete old image
@@ -157,37 +198,40 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Sorry, there was a problem while updating the product.');
         }
 
-        $description = "Admin edited the item";
+
         $changes = [];
 
+        if ($oldName != $product->name) {
+            $changes[] = "Name from {$oldName} to {$product->name}";
+        }
+    
         if ($oldPrice != $product->price) {
-            $changes[] = "price from {$oldPrice} to {$product->price}";
+            $changes[] = "Price from {$oldPrice} to {$product->price}";
         }
-
+    
         if ($oldQuantity != $product->quantity) {
-            $changes[] = "quantity from {$oldQuantity} to {$product->quantity}";
+            $changes[] = "Quantity from {$oldQuantity} to {$product->quantity}";
         }
-
+    
         if ($product->barcode != $request->barcode) {
-            $changes[] = "barcode to {$request->barcode}";
+            $changes[] = "Barcode to {$request->barcode}";
         }
-
+    
         if ($oldImage != $product->image) {
-            $changes[] = "image";
+            $changes[] = "Image Change";
         }
-
-        if ($product->description != $request->description) {
-            $changes[] = "description";
+    
+        if ($oldDesc != $product->description) {
+            $changes[] = "Description Change";
         }
-
+    
         if ($oldStatus != $request->status) {
             $statusLabel = $request->status ? "active" : "inactive";
-            $changes[] = "status to {$statusLabel}";
+            $changes[] = "Status to {$statusLabel}";
         }
+    
+        $description = implode(", ", $changes);
 
-        if (!empty($changes)) {
-            $description .= " with " . implode(", ", $changes);
-        }
 
         History::create([
             'name' => auth()->user()->firstname . ' ' . auth()->user()->lastname,

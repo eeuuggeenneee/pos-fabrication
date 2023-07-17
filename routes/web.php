@@ -50,6 +50,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/reportForm', function () {
         return view('report.report');
     })->name('reportForm');
+
+    Route::post('/inventory/history', [ProductController::class, 'printInventoryHistory'])->name('inventoryhistory');
     Route::post('/cashier/report', [ReportController::class, 'generateCashierSalesReport'])->name('cashier.report');
 
     Route::post('/generateReport', [ReportController::class, 'generateReport'])->name('generateReport');
