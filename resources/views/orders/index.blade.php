@@ -10,7 +10,15 @@
 <div class="card">
     <div class="card-body">
         <div class="row">
-            <div class="col-md-7"></div>
+            <div class="col-md-7"> 
+                <div className="col">
+                    <select id="customer-select" class="form-control" onchange="customerFilter(this.value)">
+                        <option value="Walk-In Customer">Walk-In Customer</option>
+                        {{-- Rest of the options will be populated dynamically by the script --}}
+                    </select>
+                </div>
+            </div>
+            
             <div class="col-md-5">
                 <form action="{{route('orders.index')}}">
                     <div class="row">
@@ -83,5 +91,42 @@
         {{ $orders->render() }}
     </div>
 </div>
+{{-- <script>
+    // this.state = {
+    //         customers: []
+    //     };
+    loadCustomers() {
+        axios.get(`/admin/customers`).then((res) => {
+            const customers = res.data;
+            // this.setState({ customers });
+
+        });
+    }
+</script> --}}
+
+<script> 
+    function loadCustomers() {
+    axios.get('/admin/customers').then(function (response) {
+        var customers = response.data;
+        var selectElement = document.getElementById('customer-select');
+
+        customers.forEach(function (cus) {
+            var option = document.createElement('option');
+            option.value = cus.id;
+            option.text = cus.first_name + ' ' + cus.last_name;
+            selectElement.appendChild(option);
+        });
+    });
+}
+
+function customerFilter(customerId) {
+    window.location = "{{ route('orders.index') }}?customer_id=" + customerId;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    loadCustomers();
+});
+</script>
+
 @endsection
 

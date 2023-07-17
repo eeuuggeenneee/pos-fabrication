@@ -19,7 +19,9 @@
                     <th>Image</th>
                     <th>Barcode</th>
                     <th>Price</th>
-                    <th>Quantity</th>
+                    <th>
+                        <a href="{{ route('products.index', ['dir' => $sortDirection == 'asc' ? 'desc' : 'asc']) }}">Quantity</a>
+                    </th>
                     <th>Status</th>
                     <th>Created At</th>
                     <th>Updated At</th>
