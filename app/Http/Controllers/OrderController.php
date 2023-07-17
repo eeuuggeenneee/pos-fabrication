@@ -9,14 +9,21 @@ use Illuminate\Http\Request;
 class OrderController extends Controller
 {
     public function index(Request $request) {
-        $orders = new Order();
+        $orders = new Order(); 
+        $selectedCustomerId = $request->input('customer_id', 'all');
+
         if($request->start_date) {
             $orders = $orders->where('created_at', '>=', $request->start_date);
         }
         if($request->end_date) {
             $orders = $orders->where('created_at', '<=', $request->end_date . ' 23:59:59');
         }
-        $orders = $orders->with(['items', 'payments', 'customer'])->latest()->paginate(10);
+        $orders = Order::with(['items', 'payments', 'customer'])
+        ->when($selectedCustomerId !== 'all', function ($query) use ($selectedCustomerId) {
+            return $query->where('customer_id', $selectedCustomerId);
+        })
+        ->latest()
+        ->paginate(10);
 
         $total = $orders->map(function($i) {
             return $i->total();
@@ -52,5 +59,12 @@ class OrderController extends Controller
             'user_id' => $request->user()->id,
         ]);
         return 'success';
+    }
+
+    public function customerFilter(Request $request){
+        dd($request);
+      
+
+        return view('orders.index', compact('orders', 'total', 'receivedAmount'));
     }
 }
