@@ -3,6 +3,12 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { sum } from "lodash";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { saveAs } from "file-saver";
+
+
+
 
 class Cart extends Component {
     constructor(props) {
@@ -20,7 +26,7 @@ class Cart extends Component {
             grossTotal: 0,
             netTotal: 0,
             promoCodes: [],
-            receiptData: null
+            receiptData: null,
         };
 
         this.loadCart = this.loadCart.bind(this);
@@ -122,7 +128,11 @@ class Cart extends Component {
         if (!qty) return;
 
         axios
-            .post("/admin/cart/change-qty", { product_id, quantity: qty, dis_id: this.state.discount_id })
+            .post("/admin/cart/change-qty", {
+                product_id,
+                quantity: qty,
+                dis_id: this.state.discount_id,
+            })
             .then((res) => {})
             .catch((err) => {
                 if (err.response.status === 400) {
@@ -252,55 +262,150 @@ class Cart extends Component {
             }
         });
     }
-      
-    handleClickSubmit() {
-        Swal.fire({
-            title: "Received Amount",
-            input: "text",
-            inputValue: this.state.netTotal.toFixed(2),
-            showCancelButton: true,
-            confirmButtonText: "Confirm",
-            showLoaderOnConfirm: true,
-            preConfirm: (amount) => {
-                const numericAmount = Number(amount);
-                if (isNaN(numericAmount)) {
-                    Swal.showValidationMessage("The amount must be a number");
-                
-                    return;
-                }
-    
-                const totalCartValue =
-                    this.state.discountAmount > 0
-                        ? this.state.netTotal
-                        : this.getTotal(this.state.cart);
-    
-                return axios
-                    .post("/admin/orders", {
-                        customer_id: this.state.customer_id,
-                        amount: numericAmount,
-                        discount_id: this.state.discount_id, 
-                        netTotal: this.state.netTotal,
-                    })
-                    .then((res) => {
-                        this.loadCart();
-                        const change = numericAmount - totalCartValue;
-                        return { ...res.data, change };
-                    })
-                    .catch((err) => {
-                        Swal.showValidationMessage(err.response.data.message);
-                    });
-            },
-            allowOutsideClick: () => !Swal.isLoading(),
-        }).then((result) => {
-            if (result.value) {
-                Swal.fire(
-                    `Change: ${result.value.change.toFixed(2)}`,
-                    " ",
-                    "success"
-                );
-            }
-        });
+    calculateTotal() {
+        const { cart } = this.state;
+        const total = cart.map((c) => c.pivot.quantity * c.price);
+        return sum(total).toFixed(2);
     }
+
+    generateRandomOrderId(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+          result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    }
+
+    generatePDF(orderData) {
+        const { receivedAmount,discountAmount,tax,reference_id } = orderData;
+        const receiptContent = `
+        <div style="text-align: center;">
+          <h3 style="margin-bottom: 10px;">Order Receipt</h3>
+          <hr style="border-top: 1px dashed #000; margin: 10px 0;">
+          <p style="margin-bottom: 5px;">Order ID: ${reference_id}</p>
+          <p style="margin-bottom: 5px;">Customer: ${this.state.customer_id ? `${this.state.customer_id}` : "Walk-in Customer"}</p>
+          <table style="width: 100%;">
+            <thead>
+              <tr>
+                <th style="text-align: left; padding: 5px;">Product Name</th>
+                <th style="text-align: center; padding: 5px;">Quantity</th>
+                <th style="text-align: right; padding: 5px;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${this.state.cart
+                .map(
+                  (c) => `
+                    <tr>
+                      <td style="text-align: left; padding: 5px;">${c.name}</td>
+                      <td style="text-align: center; padding: 5px;">${c.pivot.quantity}</td>
+                      <td style="text-align: right; padding: 5px;">${window.APP.currency_symbol} ${(c.price * c.pivot.quantity).toFixed(2)}</td>
+                    </tr>
+                  `
+                )
+                .join("")}
+            </tbody>
+          </table>
+          <hr style="border-top: 1px dashed #000; margin: 10px 0;">
+          <p style="text-align: right; margin-bottom: 5px;">Gross Total: ${window.APP.currency_symbol} ${this.getTotal(this.state.cart)}</p>
+          <p style="text-align: right; margin-bottom: 5px;">Discount Amount: ${window.APP.currency_symbol} - ${discountAmount}</p>
+          <p style="text-align: right; margin-bottom: 5px;">Tax Amount: ${window.APP.currency_symbol} ${(this.getTotal(this.state.cart) - discountAmount) * tax}</p>
+          <p style="text-align: right; margin-bottom: 5px;">Received Amount: ${receivedAmount}</p>
+          <p style="text-align: right; margin-bottom: 5px;">Change: ${orderData.change}</p>
+          
+        </div>
+      `;
+      
+        const printWindow = window.open("", "_blank");
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Receipt</title>
+              <style>
+                @media print {
+                  /* Define print styles for the receipt */
+                  body {
+                    font-family: Arial, sans-serif;
+                    font-size: 12px;
+                  }
+                  /* Add more print styles as needed */
+                }
+              </style>
+            </head>
+            <body>
+              ${receiptContent}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.onload = () => {
+          printWindow.print();
+          printWindow.onafterprint = () => {
+            printWindow.close();
+          };
+        };
+      }
+      
+      
+      handleClickSubmit() {
+        Swal.fire({
+          title: "Received Amount",
+          input: "text",
+          inputValue: this.state.netTotal.toFixed(2),
+          showCancelButton: true,
+          confirmButtonText: "Confirm",
+          showLoaderOnConfirm: true,
+          preConfirm: (amount) => {
+            const numericAmount = Number(amount);
+            if (isNaN(numericAmount)) {
+              Swal.showValidationMessage("The amount must be a number");
+              return;
+            }
+      
+            let totalCartValue = this.getTotal(this.state.cart);
+            if (this.state.discountAmount > 0) {
+              totalCartValue = this.state.netTotal;
+            } else {
+              totalCartValue = totalCartValue * (1 + window.APP.tax / 100);
+            }
+      
+            const orderReferenceId = this.generateRandomOrderId(8);
+            console.log(orderReferenceId);
+            return axios
+              .post("/admin/orders", {
+                customer_id: this.state.customer_id,
+                amount: numericAmount,
+                discount_id: this.state.discount_id,
+                netTotal: this.state.netTotal,
+                reference_id: orderReferenceId,
+              })
+              .then((res) => {
+                this.loadCart();
+                const change = numericAmount - totalCartValue;
+                return {
+                  ...res.data,
+                  change,
+                  receivedAmount: numericAmount,
+                  discountAmount: this.state.discountAmount,
+                  tax: window.APP.tax / 100,
+                  reference_id: orderReferenceId,
+                };
+              })
+              .catch((err) => {
+                Swal.showValidationMessage(err.response.data.message);
+              });
+          },
+          allowOutsideClick: () => !Swal.isLoading(),
+        }).then((result) => {
+          if (result.value) {
+            Swal.fire(`Change: ${result.value.change.toFixed(2)}`, " ", "success");
+            this.generatePDF(result.value);
+          }
+        });
+      }
+      
 
     render() {
         const {
@@ -531,11 +636,12 @@ class Cart extends Component {
                             </button>
                         </div>
                     </div>
-                    {this.state.receiptData && <Receipt order={this.state.receiptData} />}
+                    {this.state.receiptData && (
+                        <Receipt order={this.state.receiptData} />
+                    )}
                 </div>
             </div>
         );
-        
     }
 }
 

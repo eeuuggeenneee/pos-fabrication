@@ -12,6 +12,7 @@ class OrderItem extends Model
         'product_id',
         'order_id',
         'discount_id',
+        'reference_id',
     ];
 
     public function product()

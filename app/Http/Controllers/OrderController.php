@@ -42,6 +42,7 @@ class OrderController extends Controller
                 'quantity' => $item->pivot->quantity,
                 'product_id' => $item->id,
                 'discount_id' => $request->discount_id,
+                'reference_id' => $request->reference_id,
             ]);
             $item->quantity = $item->quantity - $item->pivot->quantity;
             $item->save();
