@@ -3,9 +3,9 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { sum } from "lodash";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import { saveAs } from "file-saver";
+// import jsPDF from "jspdf";
+// import html2canvas from "html2canvas";
+// import { saveAs } from "file-saver";
 
 
 
