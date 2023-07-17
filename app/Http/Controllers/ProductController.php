@@ -76,7 +76,7 @@ class ProductController extends Controller
             'status' => $request->status
         ]);
 
-        $description = "Admin added a new item with {$product->quantity} qty";
+        $description = "Added {$product->name} with {$product->quantity} quantity";
 
         History::create([
             'name' => auth()->user()->firstname . ' ' . auth()->user()->lastname,
@@ -85,7 +85,7 @@ class ProductController extends Controller
             'image' => $image_path,
             'date' => Carbon::now(),
             'status' => $request->status,
-            'description' => $description // Add the description
+            'description' => $description 
         ]);
 
         if (!$product) {
