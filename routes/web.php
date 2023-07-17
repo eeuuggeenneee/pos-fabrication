@@ -15,6 +15,7 @@ Route::get('/', function () {
     return redirect('/admin');
 });
 
+
 Auth::routes();
 
 Route::prefix('admin')->middleware('auth')->group(function () {
@@ -24,6 +25,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::resource('products', ProductController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('orders', OrderController::class);
+    Route::resource('discounts', DiscountController::class);
 
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');

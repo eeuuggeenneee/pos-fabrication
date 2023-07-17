@@ -45,6 +45,7 @@
                     <th>Status</th>
                     <th>To Pay</th>
                     <th>Created At</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -73,6 +74,16 @@
                     </td>
                     <td>{{config('settings.currency_symbol')}} {{number_format($order->total() - $order->receivedAmount(), 2)}}</td>
                     <td>{{$order->created_at}}</td>
+                    <td>
+                        @component('components.modal.modal', ['modalID' => 'modalComponent-'.$order->id, 'title' => 'Delete'])
+                            <p>Are you sure you want to delete {{$order->id}}</p>
+                            <form id="delete-form-{{$order->id}}" action="{{ route('orders.destroy', $order) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        @endcomponent
+                    </td>
                 </tr>
                 @endforeach
             </tbody>

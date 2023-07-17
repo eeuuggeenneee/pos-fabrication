@@ -90,5 +90,16 @@ class DiscountController extends Controller
         return redirect()->route('discounts.index')
             ->with('success', 'Discount code created successfully.');
     }
+
+    public function destroy(Discount $discount)
+    {
+        if ($discount->avatar) {
+            Storage::delete($discount->avatar);
+        }
+
+        $discount->delete();
+
+        return redirect()->route('discounts.index')->with('success', 'You have deleted the discount.');
+    }
     
 }
