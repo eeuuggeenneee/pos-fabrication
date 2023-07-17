@@ -281,9 +281,10 @@ class Cart extends Component {
         const { receivedAmount,discountAmount,tax,reference_id } = orderData;
         const receiptContent = `
         <div style="text-align: center;">
-          <h3 style="margin-bottom: 10px;">Order Receipt</h3>
+          <h2 style="margin-bottom: 10px;">Order Receipt</h2>
           <hr style="border-top: 1px dashed #000; margin: 10px 0;">
           <p style="margin-bottom: 5px;">Order ID: ${reference_id}</p>
+          <p style="margin-bottom: 5px;">Date: ${new Date().toLocaleString()}</p>
           <p style="margin-bottom: 5px;">Customer: ${this.state.customer_id ? `${this.state.customer_id}` : "Walk-in Customer"}</p>
           <table style="width: 100%;">
             <thead>
@@ -325,12 +326,21 @@ class Cart extends Component {
               <title>Receipt</title>
               <style>
                 @media print {
-                  /* Define print styles for the receipt */
-                  body {
-                    font-family: Arial, sans-serif;
-                    font-size: 12px;
-                  }
-                  /* Add more print styles as needed */
+        
+                    body {
+                      font-family: Arial, sans-serif;
+                      font-size: 12px;
+                    }
+              
+                    h3 {
+                      display: none;
+                    }
+            
+                    @page {
+              
+                      size: auto;
+                      margin-top: 0;
+                    }
                 }
               </style>
             </head>
