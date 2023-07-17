@@ -275,6 +275,9 @@ class Cart extends Component {
         const { receivedAmount,discountAmount,tax,reference_id } = orderData;
         const receiptContent = `
         <div style="text-align: center;">
+        <h1 style="margin-bottom: 10px;">${window.APP.app_name}</h1>
+        <p style="margin-bottom: 5px;">Address: ${window.APP.address}</p>
+        <hr style="border-top: 1px dashed #000; margin: 10px 0;">
           <h2 style="margin-bottom: 10px;">Order Receipt</h2>
           <hr style="border-top: 1px dashed #000; margin: 10px 0;">
           <p style="margin-bottom: 5px;">Order ID: ${reference_id}</p>

@@ -23,9 +23,9 @@
             </div>
 
             <div class="form-group">
-                <label for="app_description">App description</label>
-                <textarea name="app_description" class="form-control @error('app_description') is-invalid @enderror" id="app_description" placeholder="App description">{{ old('app_description', config('settings.app_description')) }}</textarea>
-                @error('app_description')
+                <label for="address">Address</label>
+                <textarea name="address" class="form-control @error('address') is-invalid @enderror" id="address" placeholder="Address">{{ old('address', config('settings.address')) }}</textarea>
+                @error('address')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
                 </span>

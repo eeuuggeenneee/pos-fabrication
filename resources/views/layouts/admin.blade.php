@@ -20,6 +20,8 @@
         window.APP = <?php echo json_encode([
                             'currency_symbol' => config('settings.currency_symbol'),
                             'warning_quantity' => config('settings.warning_quantity'),
+                            'app_name' => config('settings.app_name'),
+                            'address' => config('settings.address'),
                             'tax' => config('settings.tax')
 
                         ]) ?>
