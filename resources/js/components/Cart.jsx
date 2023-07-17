@@ -51,7 +51,7 @@ class Cart extends Component {
     }
 
     loadPromoCodes() {
-        axios.get("/admin/discounts/promocode").then((res) => {
+        axios.get("/admin/promocode").then((res) => {
             const promoCodes = res.data;
             this.setState({ promoCodes });
         });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Discount;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DiscountController extends Controller
 {
@@ -33,9 +34,6 @@ class DiscountController extends Controller
             ], 404);
         }
     }
-    
-    
-    
     public function index()
     {
         $discounts = Discount::all();

@@ -33,18 +33,20 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::delete('/cart/delete', [CartController::class, 'delete']);
     Route::delete('/cart/empty', [CartController::class, 'empty']);
 
+    
+    Route::get('/promocode', [DiscountController::class, 'promocode'])->name('discounts.promocode2');
+    Route::get('/discounts/promocode/{promocode}', [DiscountController::class, 'show'])->name('discounts.promocode');
     Route::get('/discounts/create', [DiscountController::class, 'create'])->name('discounts.create');
-    Route::get('/discounts/{discount}/edit', [DiscountController::class, 'edit'])->name('discounts.edit');
+    Route::get('/discounts/edit/{discount}', [DiscountController::class, 'edit'])->name('discounts.edit');
     Route::put('/discounts/{discount}', [DiscountController::class, 'update'])->name('discounts.update');
     Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
     Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
-    Route::get('/discounts/promocode/{promocode}', [DiscountController::class, 'show'])->name('discounts.promocode');
-    Route::get('/discounts/promocode', [DiscountController::class, 'promocode'])->name('discounts.promocode2');
+
+
 
     Route::get('/reportForm', function () {
         return view('report.report');
     })->name('reportForm');
-    
-    Route::post('/generateReport', [ReportController::class, 'generateReport'])->name('generateReport');
 
+    Route::post('/generateReport', [ReportController::class, 'generateReport'])->name('generateReport');
 });
