@@ -305,9 +305,11 @@ class Cart extends Component {
           <hr style="border-top: 1px dashed #000; margin: 10px 0;">
           <p style="text-align: right; margin-bottom: 5px;">Gross Total: ${window.APP.currency_symbol} ${this.getTotal(this.state.cart)}</p>
           <p style="text-align: right; margin-bottom: 5px;">Discount Amount: ${window.APP.currency_symbol} - ${discountAmount}</p>
+         
           <p style="text-align: right; margin-bottom: 5px;">Tax Amount: ${window.APP.currency_symbol} ${(this.getTotal(this.state.cart) - discountAmount) * tax}</p>
+          <strong><p style="text-align: right; margin-bottom: 5px;">Net Total: ${(((this.getTotal(this.state.cart))-discountAmount)+((this.getTotal(this.state.cart) - discountAmount) * tax))}</p></strong>
           <p style="text-align: right; margin-bottom: 5px;">Received Amount: ${receivedAmount}</p>
-          <p style="text-align: right; margin-bottom: 5px;">Change: ${orderData.change}</p>
+            <strong>  <p style="text-align: right; margin-bottom: 5px;">Change: ${orderData.change}</p></strong>
           
         </div>
       `;
