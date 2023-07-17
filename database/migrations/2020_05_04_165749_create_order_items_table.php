@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('order_id');
             $table->foreignId('product_id');
             $table->bigInteger('discount_id')->unsigned()->nullable();
-            $table->string('reference_id')->unique();
+            $table->string('reference_id');
             $table->timestamps();
 
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');

@@ -60,16 +60,21 @@ class ReportController extends Controller
                 $pdf->Cell(60, 10, $orderItem['product'], 1, 0, 'C');
                 $pdf->Cell(30, 10, $orderItem['quantity'], 1, 0, 'C');
                 $pdf->Cell(40, 10, $orderItem['price'], 1, 0, 'C');
+    
                 $pdf->Ln();
     
-                $totalPrice += $orderItem['price'];
+                if (is_numeric(str_replace(',', '', $orderItem['price']))) {
+                    $totalPrice += floatval(str_replace(',', '', $orderItem['price']));
+                }
             }
         }
     
+        $totalPriceFormatted = number_format($totalPrice, 2);
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(150, 10, 'Total', 1, 0, 'C');
-        $pdf->Cell(40, 10, $totalPrice, 1, 0, 'C');
+        $pdf->Cell(40, 10, $totalPriceFormatted, 1, 0, 'C');
         $pdf->Ln();
+    
         $content = $pdf->Output('report.pdf', 'S');
     
         return response($content)->header('Content-Type', 'application/pdf');
