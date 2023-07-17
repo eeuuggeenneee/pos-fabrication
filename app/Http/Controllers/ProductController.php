@@ -27,18 +27,18 @@ class ProductController extends Controller
         if ($request->search) {
             $products = $products->where('name', 'LIKE', "%{$request->search}%");
         }
-     
+
 
         $products = $products->latest()->paginate(10);
-        
-   
+
+
         if (request()->wantsJson()) {
             return ProductResource::collection($products);
         }
-        if( $request->dir != null){
+        if ($request->dir != null) {
             $products = Product::orderBy('quantity',  $sortDirection)->paginate(10);
         }
-        
+
         return view('products.index')->with('products', $products)->with('sortDirection', $sortDirection);
     }
 
@@ -76,20 +76,25 @@ class ProductController extends Controller
             'status' => $request->status
         ]);
 
+        $description = "Admin added a new item with {$product->quantity} qty";
+
         History::create([
             'name' => auth()->user()->firstname . ' ' . auth()->user()->lastname,
-            'action' => "Add new item/s",
+            'action' => "Add new item",
             'product' => $request->name,
             'image' => $image_path,
             'date' => Carbon::now(),
-            'status' => $request->status
+            'status' => $request->status,
+            'description' => $description // Add the description
         ]);
 
         if (!$product) {
-            return redirect()->back()->with('error', 'Sorry, there a problem while creating product.');
+            return redirect()->back()->with('error', 'Sorry, there was a problem while creating the product.');
         }
-        return redirect()->route('products.index')->with('success', 'Success, you product have been created.');
+
+        return redirect()->route('products.index')->with('success', 'Success, your product has been created.');
     }
+
 
     /**
      * Display the specified resource.
@@ -126,6 +131,8 @@ class ProductController extends Controller
         $product->description = $request->description;
         $product->barcode = $request->barcode;
         $product->price = $request->price;
+
+        $oldQuantity = $product->quantity; // Store the old quantity for comparison
         $product->quantity = $request->quantity;
         $product->status = $request->status;
 
@@ -140,20 +147,25 @@ class ProductController extends Controller
             $product->image = $image_path;
         }
 
+        if (!$product->save()) {
+            return redirect()->back()->with('error', 'Sorry, there was a problem while updating the product.');
+        }
+
+        $description = "Admin edited the item from {$oldQuantity} qty to {$product->quantity} qty";
+
         History::create([
             'name' => auth()->user()->firstname . ' ' . auth()->user()->lastname,
             'action' => "Edit Item",
             'product' => $request->name,
-            'image' =>  $product->image,
+            'image' => $product->image,
             'date' => Carbon::now(),
-            'status' => $request->status
+            'status' => $request->status,
+            'description' => $description // Add the description
         ]);
 
-        if (!$product->save()) {
-            return redirect()->back()->with('error', 'Sorry, there\'re a problem while updating product.');
-        }
-        return redirect()->route('products.index')->with('success', 'Success, your product have been updated.');
+        return redirect()->route('products.index')->with('success', 'Success, your product has been updated.');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -163,12 +175,25 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        $productName = $product->name; // Store the product name for the history record
+        $description = "Admin deleted the item {$product->name}";
+
+        History::create([
+            'name' => auth()->user()->firstname . ' ' . auth()->user()->lastname,
+            'action' => "Delete Item",
+            'product' => $productName, // Use the stored product name
+            'image' => $product->image,
+            'date' => Carbon::now(),
+            'description' => $description, // Add the description
+            'status' => false // Set the status to false or any relevant value
+        ]);
+    
         if ($product->image) {
             Storage::delete($product->image);
         }
+    
         $product->delete();
-
+    
         return redirect()->route('products.index')->with('success', 'You have deleted the product.');
-
     }
 }

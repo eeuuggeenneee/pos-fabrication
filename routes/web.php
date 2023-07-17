@@ -44,10 +44,14 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
 
 
+    Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
+    Route::delete('/history/{id}', [HistoryController::class, 'destroy'])->name('history.destroy');
 
     Route::get('/reportForm', function () {
         return view('report.report');
     })->name('reportForm');
+    Route::post('/cashier/report', [ReportController::class, 'generateCashierSalesReport'])->name('cashier.report');
 
     Route::post('/generateReport', [ReportController::class, 'generateReport'])->name('generateReport');
+
 });

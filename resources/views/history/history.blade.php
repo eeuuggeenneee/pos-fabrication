@@ -19,8 +19,7 @@
                     <th>Product</th>
                     <th>Image</th>
                     <th>Status</th>
-                    <th>Name of Admin</th>
-                    <th>Updated At</th>
+                    <th>Description</th>
                     <th>Created At</th>
                 </tr>
             </thead>
@@ -35,14 +34,9 @@
                         <span
                             class="right badge badge-{{ $history->status ? 'success' : 'danger' }}">{{$history->status ? 'Active' : 'Inactive'}}</span>
                     </td>
-                    <td>{{$history->name}}</td>
-                    <td>{{$history->created_at}}</td>
+                    <td>{{$history->description}}</td>
                     <td>{{$history->updated_at}}</td>
-                    <td>
-                        
-                        <button class="btn btn-danger btn-delete" data-url="{{route('history.destroy', $history)}}"><i
-                                class="fas fa-trash"></i></button>
-                    </td>
+                 
                 </tr>
                 @endforeach
             </tbody>

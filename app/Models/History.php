@@ -13,6 +13,7 @@ class History extends Model
         'image',
         'name',
         'date',
-        'status'
+        'status',
+        'description'
     ];
 }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('product')->nullable();
             $table->string('image')->nullable();
             $table->date('date')->nullable();
+            $table->text('description')->nullable();
             $table->boolean('status')->default(true);
             $table->string('name')->nullable();
             $table->timestamps();
