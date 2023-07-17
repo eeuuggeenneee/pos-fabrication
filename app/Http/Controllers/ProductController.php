@@ -19,14 +19,25 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $products = new Product();
+        $sortDirection = $request->dir;
+
+        // dd($sortDirection);
         if ($request->search) {
             $products = $products->where('name', 'LIKE', "%{$request->search}%");
         }
+     
+
         $products = $products->latest()->paginate(10);
+        
+   
         if (request()->wantsJson()) {
             return ProductResource::collection($products);
         }
-        return view('products.index')->with('products', $products);
+        if( $request->dir != null){
+            $products = Product::orderBy('quantity',  $sortDirection)->paginate(10);
+        }
+        
+        return view('products.index')->with('products', $products)->with('sortDirection', $sortDirection);
     }
 
     /**
