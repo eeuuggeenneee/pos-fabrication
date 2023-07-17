@@ -67,4 +67,14 @@ class OrderController extends Controller
 
         return view('orders.index', compact('orders', 'total', 'receivedAmount'));
     }
+    public function destroy(Order $order)
+    {
+        if ($order->image) {
+            Storage::delete($order->image);
+        }
+        $order->delete();
+
+        return redirect()->route('orders.index')->with('success', 'You have deleted the order.');
+
+    }
 }

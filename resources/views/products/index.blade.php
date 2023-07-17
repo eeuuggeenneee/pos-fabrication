@@ -46,8 +46,18 @@
                     <td>
                         <a href="{{ route('products.edit', $product) }}" class="btn btn-primary"><i
                                 class="fas fa-edit"></i></a>
-                        <button class="btn btn-danger btn-delete" data-url="{{route('products.destroy', $product)}}"><i
-                                class="fas fa-trash"></i></button>
+                        {{-- <button class="btn btn-danger btn-delete" data-url="{{route('products.destroy', $product)}}"><i
+                                class="fas fa-trash"></i></button> --}}
+                        {{-- @component('components.modal.modal', ['title' => 'Delete']) --}}
+                        
+                        @component('components.modal.modal', ['modalID' => 'modalComponent-'.$product->id, 'title' => 'Delete'])
+                            <p>Are you sure you want to delete {{$product->name}}</p>
+                            <form id="delete-form-{{$product->id}}" action="{{ route('products.destroy', $product) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        @endcomponent
                     </td>
                 </tr>
                 @endforeach
@@ -55,6 +65,9 @@
         </table>
         {{ $products->render() }}
     </div>
+</div>
+<div>
+   
 </div>
 @endsection
 

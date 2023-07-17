@@ -41,8 +41,14 @@
                         <td>
                             <a href="{{ route('customers.edit', $customer) }}" class="btn btn-primary"><i
                                     class="fas fa-edit"></i></a>
-                            <button class="btn btn-danger btn-delete" data-url="{{route('customers.destroy', $customer)}}"><i
-                                    class="fas fa-trash"></i></button>
+                            @component('components.modal.modal', ['modalID' => 'modalComponent-'.$customer->id, 'title' => 'Delete'])
+                                <p>Are you sure you want to delete {{$customer->first_name . ' '. $customer->last_name}}</p>
+                                <form id="delete-form-{{$customer->id}}" action="{{ route('customers.destroy', $customer) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form> 
+                            @endcomponent
                         </td>
                     </tr>
                 @endforeach

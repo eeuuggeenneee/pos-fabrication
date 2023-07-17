@@ -127,8 +127,6 @@ class CustomerController extends Controller
 
         $customer->delete();
 
-       return response()->json([
-           'success' => true
-       ]);
+        return redirect()->route('customers.index')->with('success', 'You have deleted the customer.');
     }
 }

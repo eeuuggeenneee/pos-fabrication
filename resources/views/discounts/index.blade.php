@@ -28,8 +28,14 @@
                             <td>
                                 <a href="{{ route('discounts.edit', $discount) }}" class="btn btn-primary"><i class="fas fa-edit"></i></a>
 
-                                <button class="btn btn-danger btn-delete"><i
-                                        class="fas fa-trash"></i></button>
+                                @component('components.modal.modal', ['modalID' => 'modalComponent-'.$discount->id, 'title' => 'Delete'])
+                                    <p>Are you sure you want to delete {{$discount->code}}</p>
+                                    <form id="delete-form-{{$discount->id}}" action="{{ route('discounts.destroy', $discount) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form> 
+                                @endcomponent
                             </td>
                         </tr>
                     @endforeach
