@@ -49,4 +49,5 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     })->name('reportForm');
 
     Route::post('/generateReport', [ReportController::class, 'generateReport'])->name('generateReport');
+    Route::post('/cashier/report', [ReportController::class, 'generateCashierSalesReport'])->name('cashier.report');
 });
