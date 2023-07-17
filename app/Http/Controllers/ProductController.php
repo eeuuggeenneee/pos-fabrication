@@ -130,11 +130,17 @@ class ProductController extends Controller
         $product->name = $request->name;
         $product->description = $request->description;
         $product->barcode = $request->barcode;
+
+        $oldPrice = $product->price; // Store the old price for comparison
         $product->price = $request->price;
 
         $oldQuantity = $product->quantity; // Store the old quantity for comparison
         $product->quantity = $request->quantity;
+
+        $oldStatus = $product->status; // Store the old status for comparison
         $product->status = $request->status;
+
+        $oldImage = $product->image; // Store the old image for comparison
 
         if ($request->hasFile('image')) {
             // Delete old image
@@ -151,7 +157,37 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Sorry, there was a problem while updating the product.');
         }
 
-        $description = "Admin edited the item from {$oldQuantity} qty to {$product->quantity} qty";
+        $description = "Admin edited the item";
+        $changes = [];
+
+        if ($oldPrice != $product->price) {
+            $changes[] = "price from {$oldPrice} to {$product->price}";
+        }
+
+        if ($oldQuantity != $product->quantity) {
+            $changes[] = "quantity from {$oldQuantity} to {$product->quantity}";
+        }
+
+        if ($product->barcode != $request->barcode) {
+            $changes[] = "barcode to {$request->barcode}";
+        }
+
+        if ($oldImage != $product->image) {
+            $changes[] = "image";
+        }
+
+        if ($product->description != $request->description) {
+            $changes[] = "description";
+        }
+
+        if ($oldStatus != $request->status) {
+            $statusLabel = $request->status ? "active" : "inactive";
+            $changes[] = "status to {$statusLabel}";
+        }
+
+        if (!empty($changes)) {
+            $description .= " with " . implode(", ", $changes);
+        }
 
         History::create([
             'name' => auth()->user()->firstname . ' ' . auth()->user()->lastname,
@@ -187,13 +223,13 @@ class ProductController extends Controller
             'description' => $description, // Add the description
             'status' => false // Set the status to false or any relevant value
         ]);
-    
+
         if ($product->image) {
             Storage::delete($product->image);
         }
-    
+
         $product->delete();
-    
+
         return redirect()->route('products.index')->with('success', 'You have deleted the product.');
     }
 }
