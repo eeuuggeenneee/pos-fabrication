@@ -134,7 +134,7 @@ class ProductController extends Controller
         $history = History::whereBetween('updated_at', [$fromDate, $toDate])->get();
 
         $pdf = new \FPDF();
-        $pdf->AddPage(); // Set landscape orientation
+        $pdf->AddPage(); 
         $pdf->SetFont('Arial', 'B', 30);
 
         $pdf->Cell(0, 10, 'Inventory History Report', 0, 1, 'C');
@@ -142,14 +142,13 @@ class ProductController extends Controller
         $pdf->SetFont('Arial', 'B', 15);
         $pdf->Cell(190, 5, 'Date Range: ' . $fromDate . ' to ' . $toDate, 0, 1, 'C');
         $pdf->Ln();
-        // Add table headers
+        
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(35, 10, 'Action', 1, 0, 'C');
         $pdf->Cell(35, 10, 'Product', 1, 0, 'C');
-        $pdf->Cell(120, 10, 'Description', 1, 1, 'C'); // Adjust width for landscape orientation
+        $pdf->Cell(120, 10, 'Description', 1, 1, 'C'); 
 
 
-        // Add table rows
         $pdf->SetFont('Arial', '', 12);
         foreach ($history as $record) {
             $pdf->Cell(35, 10, $record->action, 1, 0, 'C');
@@ -168,12 +167,12 @@ class ProductController extends Controller
 
     public function update(ProductUpdateRequest $request, Product $product)
     {
-        $oldName = $product->name; // Store the old name for comparison
-        $oldPrice = $product->price; // Store the old price for comparison
-        $oldQuantity = $product->quantity; // Store the old quantity for comparison
-        $oldStatus = $product->status; // Store the old status for comparison
+        $oldName = $product->name; 
+        $oldPrice = $product->price; 
+        $oldQuantity = $product->quantity;
+        $oldStatus = $product->status;
         $oldDesc = $product->description;
-        $oldImage = $product->image; // Store the old image for comparison
+        $oldImage = $product->image; 
     
         $product->name = $request->name;
         $product->description = $request->description;
