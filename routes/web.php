@@ -7,6 +7,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -49,5 +50,4 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     })->name('reportForm');
 
     Route::post('/generateReport', [ReportController::class, 'generateReport'])->name('generateReport');
-    Route::post('/cashier/report', [ReportController::class, 'generateCashierSalesReport'])->name('cashier.report');
 });

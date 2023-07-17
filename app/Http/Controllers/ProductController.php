@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
 use App\Http\Resources\ProductResource;
+use App\Models\History;
 use App\Models\Product;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -74,6 +76,15 @@ class ProductController extends Controller
             'status' => $request->status
         ]);
 
+        History::create([
+            'name' => auth()->user()->firstname . ' ' . auth()->user()->lastname,
+            'action' => "Add new item/s",
+            'product' => $request->name,
+            'image' => $image_path,
+            'date' => Carbon::now(),
+            'status' => $request->status
+        ]);
+
         if (!$product) {
             return redirect()->back()->with('error', 'Sorry, there a problem while creating product.');
         }
@@ -128,6 +139,15 @@ class ProductController extends Controller
             // Save to Database
             $product->image = $image_path;
         }
+
+        History::create([
+            'name' => auth()->user()->firstname . ' ' . auth()->user()->lastname,
+            'action' => "Edit Item",
+            'product' => $request->name,
+            'image' =>  $product->image,
+            'date' => Carbon::now(),
+            'status' => $request->status
+        ]);
 
         if (!$product->save()) {
             return redirect()->back()->with('error', 'Sorry, there\'re a problem while updating product.');
