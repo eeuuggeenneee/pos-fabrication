@@ -359,10 +359,12 @@ class Cart extends Component {
       
       
       handleClickSubmit() {
+        const netTotal = this.state.netTotal;
+      
         Swal.fire({
           title: "Received Amount",
           input: "text",
-          inputValue: this.state.netTotal.toFixed(2),
+          inputValue: netTotal.toFixed(2),
           showCancelButton: true,
           confirmButtonText: "Confirm",
           showLoaderOnConfirm: true,
@@ -373,11 +375,9 @@ class Cart extends Component {
               return;
             }
       
-            let totalCartValue = this.getTotal(this.state.cart);
-            if (this.state.discountAmount > 0) {
-              totalCartValue = this.state.netTotal;
-            } else {
-              totalCartValue = totalCartValue * (1 + window.APP.tax / 100);
+            if (numericAmount < netTotal) {
+              Swal.showValidationMessage("The received amount cannot be less than the net total");
+              return;
             }
       
             const orderReferenceId = this.generateRandomOrderId(8);
@@ -387,12 +387,12 @@ class Cart extends Component {
                 customer_id: this.state.customer_id,
                 amount: numericAmount,
                 discount_id: this.state.discount_id,
-                netTotal: this.state.netTotal,
+                netTotal: netTotal,
                 reference_id: orderReferenceId,
               })
               .then((res) => {
                 this.loadCart();
-                const change = numericAmount - totalCartValue;
+                const change = numericAmount - netTotal;
                 return {
                   ...res.data,
                   change,
@@ -414,6 +414,7 @@ class Cart extends Component {
           }
         });
       }
+      
       
 
     render() {
