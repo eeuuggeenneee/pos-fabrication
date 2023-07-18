@@ -17,10 +17,11 @@ class UserSeeder extends Seeder
         User::updateOrCreate([
             'email' => 'admin@gmail.com'
         ], [
-            'first_name' => 'Cashier',
-            'last_name' => '1',
+            'first_name' => 'Super',
+            'last_name' => 'Admin',
             'email'=>'admin@gmail.com',
-            'password' => bcrypt('admin123')
+            'password' => bcrypt('admin123'),
+            'role' => 'Super Admin'
         ]);
     }
 }

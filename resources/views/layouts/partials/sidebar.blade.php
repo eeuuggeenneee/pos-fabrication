@@ -15,7 +15,7 @@
                 <img src="{{ auth()->user()->getAvatar() }}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block">{{ auth()->user()->getFullname() }}</a>
+                <a href="#" class="d-block">{{auth()->user()->getFullname()}}</a>
             </div>
         </div>
 
@@ -28,18 +28,21 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
+                @if(auth()->user()->role != "Cashier")
                 <li class="nav-item has-treeview">
                     <a href="{{ route('products.index') }}" class="nav-link {{ activeSegment('products') }}">
                         <i class="nav-icon fas fa-th-large"></i>
                         <p>Products</p>
                     </a>
                 </li>
+                @endif
                 <li class="nav-item has-treeview">
                     <a href="{{ route('cart.index') }}" class="nav-link {{ activeSegment('cart') }}">
                         <i class="nav-icon fas fa-cart-plus"></i>
                         <p>Open POS</p>
                     </a>
                 </li>
+                @if(auth()->user()->role != "Cashier")
                 <li class="nav-item has-treeview">
                     <a href="{{ route('orders.index') }}" class="nav-link {{ activeSegment('orders') }}">
                         <i class="nav-icon fas fa-cart-plus"></i>
@@ -78,6 +81,7 @@
                         <p>Settings</p>
                     </a>
                 </li>
+                @endif
                 
                 <li class="nav-item">
                     <a href="#" class="nav-link" onclick="document.getElementById('logout-form').submit()">
