@@ -74,7 +74,27 @@ class ReportController extends Controller
         $pdf->Cell(150, 10, 'Total', 1, 0, 'C');
         $pdf->Cell(40, 10, $totalPriceFormatted, 1, 0, 'C');
         $pdf->Ln();
+        $signature = "Approved by : __________________________";
+        $printedName = auth()->user()->first_name . " " . auth()->user()->last_name;
+    
 
+        $signatureX = 10; 
+        $signatureY = $pdf->GetY() + 10; 
+        $printedNameY = $signatureY + 5; 
+        $fontSize = 12; 
+    
+      
+        $printedNameWidth = $pdf->GetStringWidth($printedName);
+    
+        $printedNameXCentered = ($pdf->GetPageWidth() - $printedNameWidth) / 3.25;
+    
+    
+        $pdf->SetFont('Arial', 'B', $fontSize);
+        $pdf->SetXY($signatureX, $signatureY);
+        $pdf->Cell(190, 10, $signature, 0, 1, 'L');
+        $pdf->SetXY($printedNameXCentered, $printedNameY);
+        $pdf->Cell($printedNameWidth, 10, $printedName, 0, 1, 'L');
+    
         $content = $pdf->Output('report.pdf', 'S');
 
         return response($content)->header('Content-Type', 'application/pdf');
@@ -117,7 +137,7 @@ class ReportController extends Controller
         $pdf->SetFont('Arial', 'B', 15);
         $pdf->Cell(190, 10, 'Date Range: ' . $fromDate . ' to ' . $toDate, 0, 1, 'C');
         $pdf->Ln();
-        $pdf->Cell(190, 12, 'Cashier: ' . $cashierName, 0, 1, 'C'); // Display the cashier's name
+        $pdf->Cell(190, 12, 'Prepared by: ' . $cashierName, 0, 1 ); // Display the cashier's name
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->Cell(60, 10, 'Customer', 1, 0, 'C');
         $pdf->Cell(60, 10, 'Product', 1, 0, 'C');
@@ -147,6 +167,28 @@ class ReportController extends Controller
         $pdf->Cell(150, 10, 'Total', 1, 0, 'C');
         $pdf->Cell(40, 10, $totalPriceFormatted, 1, 0, 'C');
         $pdf->Ln();
+
+        $signature = "Approved by : __________________________";
+        $printedName = auth()->user()->first_name . " " . auth()->user()->last_name;
+    
+
+        $signatureX = 10; 
+        $signatureY = $pdf->GetY() + 10; 
+        $printedNameY = $signatureY + 5; 
+        $fontSize = 12; 
+    
+      
+        $printedNameWidth = $pdf->GetStringWidth($printedName);
+    
+        $printedNameXCentered = ($pdf->GetPageWidth() - $printedNameWidth) / 3.25;
+    
+    
+        $pdf->SetFont('Arial', 'B', $fontSize);
+        $pdf->SetXY($signatureX, $signatureY);
+        $pdf->Cell(190, 10, $signature, 0, 1, 'L');
+        $pdf->SetXY($printedNameXCentered, $printedNameY);
+        $pdf->Cell($printedNameWidth, 10, $printedName, 0, 1, 'L');
+    
 
         $content = $pdf->Output('report.pdf', 'S');
 

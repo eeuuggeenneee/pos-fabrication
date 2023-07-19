@@ -59,6 +59,25 @@
                 </span>
                 @enderror
             </div>
+            <div class="form-row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="super_admin_first_name">First Name</label>
+                        <input type="text" class="form-control" id="super_admin_first_name" name="super_admin_first_name" value="{{ old('super_admin_first_name', Auth::user()->first_name) }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="super_admin_last_name">Last Name</label>
+                        <input type="text" class="form-control" id="super_admin_last_name" name="super_admin_last_name" value="{{ old('super_admin_first_name', Auth::user()->last_name) }}">
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            
+            
             <button type="submit" class="btn btn-primary">Change Setting</button>
         </form>
     </div>
